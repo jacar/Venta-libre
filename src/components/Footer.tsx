@@ -18,7 +18,7 @@ export default async function Footer() {
           
           <div className="md:col-span-1">
             <Link href="/" className="block mb-4">
-              <img src="https://www.ventalibre.top/wp-content/uploads/2026/06/webcincodev-160-x-40-px.svg" alt="Venta Libre" className="h-10" />
+              <img src="https://admin.ventalibre.top/wp-content/uploads/2026/06/webcincodev-160-x-40-px.svg" alt="Venta Libre" className="h-10" />
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Elevando tu estilo con la mejor selección de moda contemporánea. Calidad y diseño sin compromisos.

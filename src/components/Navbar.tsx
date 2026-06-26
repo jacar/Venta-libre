@@ -89,7 +89,7 @@ export default function Navbar() {
               {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
             </button>
             <Link href="/" className="flex items-center">
-              <img src="https://www.ventalibre.top/wp-content/uploads/2026/06/webcincodev-160-x-40-px.svg" alt="Venta Libre" className="h-10" />
+              <img src="https://admin.ventalibre.top/wp-content/uploads/2026/06/webcincodev-160-x-40-px.svg" alt="Venta Libre" className="h-10" />
             </Link>
           </div>
 
