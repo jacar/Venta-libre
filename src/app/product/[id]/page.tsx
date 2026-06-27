@@ -27,7 +27,23 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     const response = await api.get(`products/${id}`);
     product = response.data;
   } catch (error) {
-    return <div className="p-12 text-center text-xl bg-white min-h-screen">Producto no encontrado</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f5f5] px-4 text-center">
+        <div className="w-24 h-24 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center mb-6">
+          <ShoppingCart className="w-12 h-12 opacity-50" />
+        </div>
+        <h1 className="text-4xl font-black text-gray-900 mb-4">Producto no encontrado</h1>
+        <p className="text-lg text-gray-600 max-w-md mb-8">
+          Lo sentimos, el producto que buscas no existe, se ha agotado o estamos actualizando nuestro inventario.
+        </p>
+        <Link 
+          href="/" 
+          className="bg-black text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#fb7701] transition-all shadow-lg"
+        >
+          Volver a la Tienda
+        </Link>
+      </div>
+    );
   }
 
   const priceNum = parseFloat(product.price) || 0;

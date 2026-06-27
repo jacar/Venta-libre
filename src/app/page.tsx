@@ -235,7 +235,23 @@ export default async function Home() {
 
       <div id="catalogo" className="max-w-[1400px] mx-auto px-2 sm:px-4">
         
-        {hasCategories ? (
+        {!hasCategories && latestProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="w-24 h-24 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-6">
+              <Sparkles className="w-12 h-12" />
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">Actualizando Catálogo</h2>
+            <p className="text-gray-500 max-w-md mb-8">
+              Estamos sincronizando nuestros últimos productos. Si ves este mensaje por error, por favor recarga la página.
+            </p>
+            <a 
+              href="/" 
+              className="bg-[#fb7701] text-white px-8 py-3 rounded-full font-bold hover:bg-[#e52e04] transition-colors shadow-lg"
+            >
+              Recargar Página
+            </a>
+          </div>
+        ) : hasCategories ? (
           categoriesWithProducts.map((cat: any) => (
             <div key={cat.id} className="mb-8">
               <div className="bg-white px-4 py-3 border-b border-gray-200 flex items-center justify-between rounded-t-lg shadow-sm">
