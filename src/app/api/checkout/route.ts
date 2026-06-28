@@ -19,12 +19,8 @@ export async function POST(request: Request) {
     const response = await api.post("orders", data);
     const orderId = response.data.id;
     
-    // 2. Inmediatamente la pasamos a 'processing'. 
-    // Esto fuerza a que WooCommerce dispare los "hooks" (eventos) de cambio de estado,
-    // que es lo que MasterShop y otros plugins suelen escuchar para sincronizar pedidos.
-    await api.put(`orders/${orderId}`, {
-      status: "processing"
-    });
+    // La orden se crea en estado 'pending' (Pendiente de pago)
+    // tal cual fue solicitada, sin forzar cambio de estado.
 
     // 3. Enviar a MasterShop (Dropshipping)
     try {
