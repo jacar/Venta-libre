@@ -4,6 +4,7 @@ import { api } from "@/lib/woocommerce";
 import Link from "next/link";
 import { ShoppingCart, Shirt, Baby, Home as HomeIcon, Smartphone, Sparkles, Dumbbell, Dog, Gem, Briefcase, Trees, Car, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
 import React from "react";
+import EmergencyBanner from "@/components/EmergencyBanner";
 
 // Forzar revalidación cada 60 segundos para evitar saturar la API (Performance Guardian Skill)
 export const revalidate = 60;
@@ -102,6 +103,7 @@ export default async function Home() {
 
   return (
     <div className="bg-[#f5f5f5] min-h-screen pb-20">
+      <EmergencyBanner />
       <Hero latestProducts={heroProducts} />
       
       {/* BANNER DE CONFIANZA: PAGO CONTRA ENTREGA */}
