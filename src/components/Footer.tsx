@@ -52,13 +52,15 @@ export default async function Footer() {
           <div>
             <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wider text-sm">Newsletter</h3>
             <p className="text-gray-500 text-sm mb-4">Suscríbete para recibir un 10% de descuento en tu primera compra.</p>
-            <form className="flex">
+            <form action="https://formsubmit.co/webcincodev@gmail.com" method="POST" className="flex">
               <input 
                 type="email" 
+                name="email"
+                required
                 placeholder="Tu email..." 
                 className="w-full bg-gray-50 border border-gray-200 rounded-l-lg px-4 py-2 focus:outline-none focus:border-blue-500 text-sm"
               />
-              <button className="bg-black text-white px-4 py-2 rounded-r-lg font-bold hover:bg-gray-800 transition-colors text-sm">
+              <button type="submit" className="bg-black text-white px-4 py-2 rounded-r-lg font-bold hover:bg-gray-800 transition-colors text-sm">
                 Unirse
               </button>
             </form>
@@ -70,11 +72,7 @@ export default async function Footer() {
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()} Venta Libre. Todos los derechos reservados.
           </p>
-          <div className="flex space-x-6">
-            <Link href="https://instagram.com" target="_blank" className="text-gray-400 hover:text-[#fb7701] transition-colors">Instagram</Link>
-            <Link href="https://twitter.com" target="_blank" className="text-gray-400 hover:text-[#fb7701] transition-colors">Twitter</Link>
-            <Link href="https://facebook.com" target="_blank" className="text-gray-400 hover:text-[#fb7701] transition-colors">Facebook</Link>
-          </div>
+
         </div>
       </div>
     </footer>
