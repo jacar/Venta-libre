@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       password,
       first_name: first_name || "",
       last_name: last_name || "",
+      role: "customer", // Forzar explícitamente el rol de cliente por seguridad
     });
 
     const data = response.data;

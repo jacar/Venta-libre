@@ -79,7 +79,8 @@ const handler = NextAuth({
               email: email,
               first_name: user.name?.split(' ')[0] || "",
               last_name: user.name?.split(' ').slice(1).join(' ') || "",
-              password: randomPassword
+              password: randomPassword,
+              role: "customer" // Forzar explícitamente el rol de cliente por seguridad
             });
           }
         } catch (error) {
