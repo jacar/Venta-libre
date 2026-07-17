@@ -9,6 +9,7 @@ import AdsBanner from "@/components/AdsBanner";
 import OutletHeroSlider from "@/components/OutletHeroSlider";
 import ProductSlider from "@/components/ProductSlider";
 import ElegantProductGrid from "@/components/ElegantProductGrid";
+import SportsProductGrid from "@/components/SportsProductGrid";
 
 export const revalidate = 60;
 
@@ -112,15 +113,46 @@ async function getOutletData() {
         catProducts = Array.isArray(catResponse.data) ? catResponse.data : [];
     }
 
-    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts };
+    // Get products for "Deportivos"
+    let deportivosProducts = [];
+    try {
+        const deportivosCategories = allCategories.filter((c: any) => {
+            const name = c.name.toLowerCase();
+            const slug = c.slug.toLowerCase();
+            return name.includes("deport") || name.includes("sport") || slug.includes("deport") || slug.includes("sport");
+        });
+        
+        if (deportivosCategories.length > 0) {
+            const depCatIds = deportivosCategories.map((c: any) => c.id).join(",");
+            const depResponse = await api.get("products", {
+                category: depCatIds,
+                per_page: 8,
+                status: "publish",
+                orderby: "date",
+                order: "desc"
+            });
+            deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
+        } else {
+            const depResponse = await api.get("products", {
+                search: "deport",
+                per_page: 8,
+                status: "publish"
+            });
+            deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
+        }
+    } catch (e) {
+        console.error("Error fetching deportivos:", e);
+    }
+
+    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts };
   } catch (error) {
     console.error("[Outlet] Error al obtener datos:", error);
-    return { categories: [], featuredProducts: [], products: [], catProducts: [] };
+    return { categories: [], featuredProducts: [], products: [], catProducts: [], deportivosProducts: [] };
   }
 }
 
 export default async function OutletPage() {
-  const { categories, featuredProducts, products, catProducts } = await getOutletData();
+  const { categories, featuredProducts, products, catProducts, deportivosProducts } = await getOutletData();
 
   return (
     <div className="bg-white min-h-screen font-sans text-gray-900 selection:bg-black selection:text-white">
@@ -244,6 +276,22 @@ export default async function OutletPage() {
               </div>
           )}
       </section>
+
+      {/* 4.7. COLECCIÓN DEPORTIVA (Asymmetric Grid) */}
+      {deportivosProducts.length > 0 && (
+          <section className="py-8 lg:py-16 px-4 lg:px-6 max-w-[1400px] mx-auto border-t border-gray-100 mt-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                  <div>
+                      <span className="text-[#fb7701] text-xs font-black tracking-widest uppercase mb-2 block">Rendimiento y Estilo</span>
+                      <h2 className="text-3xl font-black tracking-tight uppercase text-gray-900">Colección Deportiva</h2>
+                  </div>
+                  <Link href="/categoria/deportivos" className="text-sm font-bold text-[#fb7701] hover:text-black transition-colors mt-2 md:mt-0 flex items-center gap-1">
+                      Ver toda la colección deportiva &rarr;
+                  </Link>
+              </div>
+              <SportsProductGrid products={deportivosProducts} />
+          </section>
+      )}
 
       {/* 5. Barra de Suscripción (Newsletter) */}
       <section className="bg-[#F9F9F9] border-t border-gray-100 py-12 lg:py-16 px-4 lg:px-6 mt-10">
