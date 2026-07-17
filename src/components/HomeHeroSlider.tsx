@@ -47,7 +47,7 @@ const slides: Slide[] = [
     buttonText: "COMPRAR OUTLET",
     buttonLink: "/outlet",
     badge: "💎 PRECIOS DE OUTLET",
-    image: "/hero-outlet.png",
+    image: "https://admin.ventalibre.top/wp-content/uploads/2026/07/ChatGPT-Image-17-jul-2026-12_28_31.png",
     themeColor: "from-[#ECEFF2] to-[#B5C2DE]"
   }
 ];
