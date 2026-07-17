@@ -8,7 +8,7 @@ export default async function Footer() {
     const response = await api.get("products/categories", { hide_empty: false });
     // Filtrar "sin-categorizar" y tomar las 3 primeras
     const data = Array.isArray(response.data) ? response.data : [];
-    categories = data.filter((c: any) => c.slug !== "sin-categorizar" && c.slug !== "uncategorized").slice(0, 3);
+    categories = data.filter((c: any) => c.slug !== "sin-categorizar" && c.slug !== "uncategorized" && c.slug !== "botas").slice(0, 3);
   } catch (error) {
     console.error("[Footer] Error al obtener categorías:", error);
   }
@@ -24,7 +24,7 @@ export default async function Footer() {
                 src="https://admin.ventalibre.top/wp-content/uploads/2026/06/webcincodev-160-x-40-px.svg" 
                 alt="Venta Libre" 
                 fill
-                className="object-contain filter invert opacity-90 hover:opacity-100 transition-opacity"
+                className="object-contain opacity-90 hover:opacity-100 transition-opacity"
               />
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
