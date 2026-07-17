@@ -113,33 +113,18 @@ async function getOutletData() {
         catProducts = Array.isArray(catResponse.data) ? catResponse.data : [];
     }
 
-    // Get products for "Deportivos"
+    // Get products for "Deportivos" y "Deportes"
+    // IDs exactos de WooCommerce: 52=Deportes (11 products), 75=Deportivos (4 products)
     let deportivosProducts = [];
     try {
-        const deportivosCategories = allCategories.filter((c: any) => {
-            const name = c.name.toLowerCase();
-            const slug = c.slug.toLowerCase();
-            return name.includes("deport") || name.includes("sport") || slug.includes("deport") || slug.includes("sport");
+        const depResponse = await api.get("products", {
+            category: "52,75", // Deportes (ID 52) + Deportivos (ID 75)
+            per_page: 12,
+            status: "publish",
+            orderby: "date",
+            order: "desc"
         });
-        
-        if (deportivosCategories.length > 0) {
-            const depCatIds = deportivosCategories.map((c: any) => c.id).join(",");
-            const depResponse = await api.get("products", {
-                category: depCatIds,
-                per_page: 8,
-                status: "publish",
-                orderby: "date",
-                order: "desc"
-            });
-            deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
-        } else {
-            const depResponse = await api.get("products", {
-                search: "deport",
-                per_page: 8,
-                status: "publish"
-            });
-            deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
-        }
+        deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
     } catch (e) {
         console.error("Error fetching deportivos:", e);
     }
