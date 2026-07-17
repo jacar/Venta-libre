@@ -1,0 +1,8 @@
+[build]
+  command = "npx next build --webpack"
+  publish = ".next"
+
+[build.environment]
+  NODE_OPTIONS = "--max-old-space-size=4096"
+  NEXT_DISABLE_ESLINT = "1"
+  NEXT_IGNORE_TYPE_CHECKS = "1"
