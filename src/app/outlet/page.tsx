@@ -118,7 +118,7 @@ async function getOutletData() {
     let deportivosProducts = [];
     try {
         const depResponse = await api.get("products", {
-            category: "52,75", // Deportes (ID 52) + Deportivos (ID 75)
+            category: "75", // Deportivos (ID 75) — calzado deportivo/atlético
             per_page: 12,
             status: "publish",
             orderby: "date",
