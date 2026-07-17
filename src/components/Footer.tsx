@@ -79,7 +79,9 @@ export default async function Footer() {
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()} Venta Libre. Todos los derechos reservados.
           </p>
-
+          <p className="text-gray-400 text-sm">
+            Desarrollado por <a href="https://www.jacomeovalle.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#fb7701] transition-colors font-medium">Armando Ovalle J.</a>
+          </p>
         </div>
       </div>
     </footer>
