@@ -225,6 +225,7 @@ export default async function OutletPage() {
                       src="https://admin.ventalibre.top/wp-content/uploads/2026/07/7390aa4d-52e4-4da0-ae70-03bbc17c87cb.png" 
                       alt="Los Más Buscados" 
                       fill 
+                      sizes="(max-width: 1024px) 100vw, 66vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
                   />
                   <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-700"></div>
@@ -237,6 +238,7 @@ export default async function OutletPage() {
                           src="https://admin.ventalibre.top/wp-content/uploads/2026/07/ChatGPT-Image-16-jul-2026-17_59_45.png" 
                           alt="Outdoor Active" 
                           fill 
+                          sizes="(max-width: 1024px) 100vw, 33vw"
                           className="object-cover object-bottom group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
                       />
                       <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-700"></div>
@@ -246,6 +248,7 @@ export default async function OutletPage() {
                           src="https://admin.ventalibre.top/wp-content/uploads/2026/07/ChatGPT-Image-16-jul-2026-18_13_14.png" 
                           alt="Casual Comfort" 
                           fill 
+                          sizes="(max-width: 1024px) 100vw, 33vw"
                           className="object-cover object-bottom group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
                       />
                       <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-700"></div>
