@@ -1,5 +1,5 @@
 import Hero from "@/components/Hero";
-import OutletHeroSlider from "@/components/OutletHeroSlider";
+import HomeHeroSlider from "@/components/HomeHeroSlider";
 import AutoCarousel from "@/components/AutoCarousel";
 import { getCachedCategories, getCachedProducts } from "@/lib/data";
 import Link from "next/link";
@@ -136,7 +136,7 @@ export default async function Home() {
   return (
     <div className="bg-[#f5f5f5] min-h-screen pb-20">
       <EmergencyBanner />
-      <OutletHeroSlider />
+      <HomeHeroSlider />
       <Hero latestProducts={heroProducts} />
       
       {/* BANNER DE CONFIANZA: PAGO CONTRA ENTREGA */}
