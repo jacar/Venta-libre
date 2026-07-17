@@ -209,7 +209,9 @@ export default function Navbar({ categories = [] }: { categories?: any[] }) {
           <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-6 overflow-x-auto w-full py-2">
             <Link href="/" className="font-bold text-[#fb7701] flex-shrink-0 border-b-2 border-[#fb7701] pb-0.5">Mejores Ventas</Link>
             <Link href="/" className="font-bold text-gray-700 hover:text-[#fb7701] flex-shrink-0">Novedades</Link>
-            <Link href="/outlet" className="font-black text-[#8B7355] hover:text-[#fb7701] flex-shrink-0">Outlet</Link>
+            <Link href="/outlet" className="font-black text-[#e52e04] hover:text-black flex-shrink-0 flex items-center gap-1 px-2.5 py-1 bg-red-50 rounded-md border border-red-100 hover:border-red-200 transition-all duration-300 shadow-sm">
+              <span>Outlet 🔥</span>
+            </Link>
             {visibleCategories.map(cat => (
               <Link 
                 key={cat.id} 
@@ -240,7 +242,10 @@ export default function Navbar({ categories = [] }: { categories?: any[] }) {
              </div>
             <Link onClick={() => setMobileMenuOpen(false)} href="/" className="px-4 py-3 text-sm font-bold text-[#fb7701] border-b border-gray-50 flex justify-between">Mejores Ventas <span>&rarr;</span></Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/" className="px-4 py-3 text-sm font-bold text-gray-800 border-b border-gray-50 flex justify-between">Novedades <span>&rarr;</span></Link>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/outlet" className="px-4 py-3 text-sm font-black text-[#8B7355] border-b border-gray-50 flex justify-between bg-[#FDFBF7]">Outlet <span>&rarr;</span></Link>
+            <Link onClick={() => setMobileMenuOpen(false)} href="/outlet" className="px-4 py-3 text-sm font-black text-[#e52e04] border-b border-gray-50 flex justify-between bg-red-50/50 hover:bg-red-50 transition-colors">
+              <span>Outlet 🔥</span>
+              <span className="bg-[#e52e04] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase self-center animate-pulse">Liquidación</span>
+            </Link>
             <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider mt-2">Categorías</div>
             {visibleCategories.map(cat => (
               <Link 
