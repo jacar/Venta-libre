@@ -91,8 +91,8 @@ export default function HomeHeroSlider() {
               style={{ backgroundImage: `url("${slide.image}")` }}
             ></div>
 
-            {/* Left fade for desktop so text is clean */}
-            <div className="absolute top-0 left-0 w-full md:w-[50%] h-full bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/90 to-transparent pointer-events-none z-10 hidden md:block"></div>
+            {/* Fade overlay so text is clean and legible on both mobile and desktop */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/90 to-[#FAF8F5]/30 md:bg-gradient-to-r md:from-[#FAF8F5] md:via-[#FAF8F5]/95 md:to-transparent pointer-events-none z-10"></div>
 
             {/* Content Content Container */}
             <div className="max-w-[1400px] w-full mx-auto h-full relative z-20 px-6 sm:px-12 md:px-20 flex flex-col justify-center">
