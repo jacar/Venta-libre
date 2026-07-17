@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { UserCircle, KeyRound, Loader2, Mail, Type } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +28,12 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError("");
 
+    if (!turnstileToken) {
+      setError("Por favor, verifica que eres humano antes de continuar.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // 1. Crear cuenta en WordPress
       const res = await fetch("/api/register", {
@@ -36,6 +44,7 @@ export default function RegisterPage() {
           last_name: formData.lastName,
           email: formData.email,
           password: formData.password,
+          turnstileToken,
         }),
       });
 
@@ -158,11 +167,20 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          <div className="flex justify-center mt-4">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setError("Error al cargar la verificación de seguridad.")}
+              options={{ theme: "light" }}
+            />
+          </div>
+
           <div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-[#fb7701] hover:bg-[#e06a01] hover:shadow-[0_0_15px_rgba(251,119,1,0.4)] focus:outline-none transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={isLoading || !turnstileToken}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-[#fb7701] hover:bg-[#e06a01] hover:shadow-[0_0_15px_rgba(251,119,1,0.4)] focus:outline-none transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
             >
               {isLoading ? (
                 <>
