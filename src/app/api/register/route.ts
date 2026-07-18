@@ -4,31 +4,10 @@ import { api } from '@/lib/woocommerce';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, first_name, last_name, turnstileToken } = body;
+    const { email, password, first_name, last_name } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 });
-    }
-
-    if (!turnstileToken) {
-      return NextResponse.json({ error: 'Token de seguridad requerido' }, { status: 400 });
-    }
-
-    // Validar token con Cloudflare Turnstile
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-    if (turnstileSecret) {
-      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `secret=${turnstileSecret}&response=${turnstileToken}`,
-      });
-      const verifyData = await verifyRes.json();
-      
-      if (!verifyData.success) {
-        return NextResponse.json({ error: 'Fallo en la validación de seguridad antibots' }, { status: 403 });
-      }
     }
 
     // Crear cliente en WooCommerce usando el wrapper oficial
