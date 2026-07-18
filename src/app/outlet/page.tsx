@@ -323,7 +323,7 @@ export default async function OutletPage() {
               {/* Banner Header Centrado */}
               <div className="relative w-full h-[250px] md:h-[350px] lg:h-[400px] rounded-3xl overflow-hidden mb-12 flex items-center justify-center group shadow-md bg-gray-900">
                   <Image 
-                      src="https://admin.ventalibre.top/wp-content/uploads/2026/07/7390aa4d-52e4-4da0-ae70-03bbc17c87cb.png" 
+                      src="/bannerVentalibre.png" 
                       alt="Lo Más Cool" 
                       fill 
                       sizes="100vw"
