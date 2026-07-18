@@ -31,4 +31,10 @@ html, body {
 input, textarea, select {
   color: #000000 !important;
 }
-
+/* Aplicar tipografía Groote a todos los h1, h2 y helper class */
+h1, h2, .font-groote {
+  font-family: var(--font-groote), sans-serif !important;
+  line-height: 1.3 !important; /* Da más altura/respiro a los textos de la tipografía */
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+}

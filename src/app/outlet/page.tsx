@@ -7,7 +7,7 @@ import Image from "next/image";
 import LooksDestacados from "@/components/LooksDestacados";
 import AdsBanner from "@/components/AdsBanner";
 import OutletHeroSlider from "@/components/OutletHeroSlider";
-import ProductSlider from "@/components/ProductSlider";
+import SplitProductGallery from "@/components/SplitProductGallery";
 import ElegantProductGrid from "@/components/ElegantProductGrid";
 import SportsProductGrid from "@/components/SportsProductGrid";
 
@@ -43,6 +43,9 @@ async function getOutletData() {
                slug.includes("moda") || slug.includes("ropa") || slug.includes("accesorio");
     }).slice(0, 6);
 
+    // Set para evitar productos duplicados en toda la página
+    const seenIds = new Set();
+
     // Get products for the featured category (Moda, ropa y accesorios)
     const featuredCatIds = featuredCategories.map((c: any) => c.id).join(",");
     let featuredProducts = [];
@@ -77,9 +80,9 @@ async function getOutletData() {
         let fetchedProducts = Array.isArray(prodResponse.data) ? prodResponse.data : [];
         
         // Remove products that are already shown in the featured category to prevent duplicates
-        const featuredIds = new Set(featuredProducts.map((p: any) => p.id));
+        featuredProducts.forEach((p: any) => seenIds.add(p.id));
         allProducts = fetchedProducts.filter((p: any) => {
-            if (featuredIds.has(p.id)) return false;
+            if (seenIds.has(p.id)) return false;
             // Ensure it's footwear if we had to fallback to targetCategories
             if (calzadoCategories.length === 0) {
                 const name = p.name.toLowerCase();
@@ -113,6 +116,13 @@ async function getOutletData() {
         catProducts = Array.isArray(catResponse.data) ? catResponse.data : [];
     }
 
+    // Filtrar los que ya se mostraron en secciones destacadas (pero NO allProducts para no vaciar estas galerías)
+    catProducts = catProducts.filter((p: any) => {
+        if (seenIds.has(p.id)) return false;
+        seenIds.add(p.id);
+        return true;
+    });
+
     // Get products for "Deportivos" y "Deportes"
     // IDs exactos de WooCommerce: 52=Deportes (11 products), 75=Deportivos (4 products)
     let deportivosProducts = [];
@@ -124,20 +134,62 @@ async function getOutletData() {
             orderby: "date",
             order: "desc"
         });
-        deportivosProducts = Array.isArray(depResponse.data) ? depResponse.data : [];
+        let rawDeportivos = Array.isArray(depResponse.data) ? depResponse.data : [];
+        deportivosProducts = rawDeportivos.filter((p: any) => {
+            if (seenIds.has(p.id)) return false;
+            seenIds.add(p.id);
+            return true;
+        });
     } catch (e) {
         console.error("Error fetching deportivos:", e);
     }
 
-    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts };
+    // Get products for "Cool"
+    let coolProducts = [];
+    try {
+        const coolCategories = allCategories.filter((c: any) => c.name.toLowerCase().includes("cool") || c.slug.toLowerCase().includes("cool"));
+        
+        if (coolCategories.length > 0) {
+            const coolCatIds = coolCategories.map((c: any) => c.id).join(",");
+            const coolResponse = await api.get("products", {
+                category: coolCatIds,
+                per_page: 20,
+                status: "publish",
+                orderby: "date",
+                order: "desc"
+            });
+            let rawCool = Array.isArray(coolResponse.data) ? coolResponse.data : [];
+            coolProducts = rawCool.filter((p: any) => {
+                if (seenIds.has(p.id)) return false;
+                seenIds.add(p.id);
+                return true;
+            });
+        } else {
+            const coolResponse = await api.get("products", {
+                search: "cool",
+                per_page: 20,
+                status: "publish"
+            });
+            let rawCool = Array.isArray(coolResponse.data) ? coolResponse.data : [];
+            coolProducts = rawCool.filter((p: any) => {
+                if (seenIds.has(p.id)) return false;
+                seenIds.add(p.id);
+                return true;
+            });
+        }
+    } catch (e) {
+        console.error("Error fetching cool products:", e);
+    }
+
+    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts, coolProducts };
   } catch (error) {
     console.error("[Outlet] Error al obtener datos:", error);
-    return { categories: [], featuredProducts: [], products: [], catProducts: [], deportivosProducts: [] };
+    return { categories: [], featuredProducts: [], products: [], catProducts: [], deportivosProducts: [], coolProducts: [] };
   }
 }
 
 export default async function OutletPage() {
-  const { categories, featuredProducts, products, catProducts, deportivosProducts } = await getOutletData();
+  const { categories, featuredProducts, products, catProducts, deportivosProducts, coolProducts } = await getOutletData();
 
   return (
     <div className="bg-white min-h-screen font-sans text-gray-900 selection:bg-black selection:text-white">
@@ -195,7 +247,7 @@ export default async function OutletPage() {
               <h2 className="text-2xl font-bold text-center mb-12 tracking-wide uppercase">
                   {categories.length === 1 ? categories[0].name : "Moda, Ropa y Accesorios"}
               </h2>
-              <ProductSlider products={featuredProducts} autoPlay={true} />
+              <SplitProductGallery products={featuredProducts} />
           </section>
       )}
 
@@ -204,7 +256,7 @@ export default async function OutletPage() {
           <section id="productos" className="py-8 lg:py-16 px-4 lg:px-6 max-w-[1400px] mx-auto">
               <h2 className="text-2xl font-bold text-center mb-12 tracking-wide uppercase">CALZADOS REPLICAS AAA</h2>
               
-              <ProductSlider products={products} autoPlay={true} />
+              <SplitProductGallery products={products} />
 
               <div className="mt-12 flex justify-center">
                   <Link href="/categoria/outlet" className="bg-black text-white px-8 py-3.5 text-sm font-semibold tracking-wide uppercase hover:bg-gray-800 transition-colors rounded-sm">
@@ -264,6 +316,34 @@ export default async function OutletPage() {
               </div>
           )}
       </section>
+
+      {/* NUEVA SECCIÓN: LO MÁS COOL */}
+      {coolProducts.length > 0 && (
+          <section className="py-12 lg:py-16 px-4 lg:px-6 max-w-[1400px] mx-auto border-t border-gray-100">
+              {/* Banner Header Centrado */}
+              <div className="relative w-full h-[250px] md:h-[350px] lg:h-[400px] rounded-3xl overflow-hidden mb-12 flex items-center justify-center group shadow-md bg-gray-900">
+                  <Image 
+                      src="https://admin.ventalibre.top/wp-content/uploads/2026/07/7390aa4d-52e4-4da0-ae70-03bbc17c87cb.png" 
+                      alt="Lo Más Cool" 
+                      fill 
+                      sizes="100vw"
+                      className="object-cover object-[center_30%] opacity-60 group-hover:scale-105 transition-transform duration-1000"
+                  />
+                  
+                  <div className="relative z-10 text-center px-4 flex flex-col items-center">
+                      <span className="text-white/90 text-xs md:text-sm font-bold tracking-[0.3em] uppercase block mb-3 backdrop-blur-sm bg-black/20 px-4 py-1.5 rounded-full border border-white/20">
+                          Colección Premium
+                      </span>
+                      <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-white tracking-widest uppercase drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+                          Lo Más Cool
+                      </h2>
+                  </div>
+              </div>
+              
+              {/* Grid Elegante */}
+              <ElegantProductGrid products={coolProducts} />
+          </section>
+      )}
 
       {/* 4.7. COLECCIÓN DEPORTIVA (Asymmetric Grid) */}
       {deportivosProducts.length > 0 && (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from 'next/font/local';
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -23,6 +24,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const grooteFont = localFont({
+  src: '../../public/Groote-Regular.otf',
+  variable: '--font-groote',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -103,7 +110,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${grooteFont.variable}`}>
       <head>
         <script
           type="application/ld+json"
