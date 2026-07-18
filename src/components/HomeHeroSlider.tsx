@@ -109,7 +109,7 @@ export default function HomeHeroSlider() {
                 </p>
 
                 {/* Title */}
-                <h2 className="text-4xl md:text-[64px] font-black tracking-[-0.03em] text-gray-900 leading-[1.05] mb-6 whitespace-pre-line">
+                <h2 className="text-3xl sm:text-4xl md:text-[64px] font-black tracking-[-0.03em] text-gray-900 leading-[1.1] md:leading-[1.05] mb-6 whitespace-pre-line break-words">
                   {slide.title}
                 </h2>
 

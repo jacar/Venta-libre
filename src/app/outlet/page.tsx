@@ -15,7 +15,7 @@ export const revalidate = 60;
 
 async function getOutletData() {
   try {
-    const response = await api.get("products/categories", { hide_empty: false });
+    const response = await api.get("products/categories", { hide_empty: false, per_page: 100 });
     const allCategories = Array.isArray(response.data) ? response.data : [];
     
     let outletParent = allCategories.find((c: any) => c.slug.toLowerCase() === "outlet");
