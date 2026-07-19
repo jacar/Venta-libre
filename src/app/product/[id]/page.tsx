@@ -160,7 +160,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               let displayDescription = product.description || "No hay descripción disponible.";
               const unwantedTexts = [
                 "Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:",
-                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:</p>"
+                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:</p>",
+                "Aquí tienes el texto optimizado y estructurado de forma profesional para tu catálogo o plataforma de e-commerce, manteniendo un diseño limpio, una lectura clara de las políticas y completamente libre de emojis:",
+                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para tu catálogo o plataforma de e-commerce, manteniendo un diseño limpio, una lectura clara de las políticas y completamente libre de emojis:</p>"
               ];
               
               unwantedTexts.forEach(text => {
