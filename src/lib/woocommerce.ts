@@ -1,5 +1,8 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
+// Deshabilitar verificación estricta de SSL/TLS (Evita error: "unable to verify the first certificate")
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const url = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || "";
 const isHttps = url.startsWith("https");
 

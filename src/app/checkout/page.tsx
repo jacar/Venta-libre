@@ -125,23 +125,25 @@ export default function CheckoutPage() {
     const waLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textMessage)}`;
 
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-lg w-full bg-white rounded-3xl shadow-2xl p-10 text-center transform transition-all hover:scale-105 duration-300">
+          <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">¡Gracias por tu compra!</h1>
+          <p className="text-lg text-gray-600 mb-8">Tu pedido #{orderId} ha sido registrado exitosamente.</p>
+          
+          <a 
+            href={waLink}
+            className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-600 transition-all duration-300 inline-block mb-6 w-full shadow-lg hover:shadow-xl hover:-translate-y-1"
+          >
+            Confirmar pedido por WhatsApp
+          </a>
+          <br />
+          <Link href="/" className="text-gray-500 hover:text-gray-900 font-bold transition-colors inline-block">
+            Volver a la tienda
+          </Link>
         </div>
-        <h1 className="text-4xl font-black text-gray-900 mb-4">¡Gracias por tu compra!</h1>
-        <p className="text-lg text-gray-600 mb-8">Tu pedido #{orderId} ha sido registrado exitosamente.</p>
-        
-        <a 
-          href={waLink}
-          className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-600 transition-colors inline-block mb-6 w-full sm:w-auto shadow-md"
-        >
-          Confirmar pedido por WhatsApp
-        </a>
-        <br />
-        <Link href="/" className="text-gray-500 hover:text-gray-900 font-medium transition-colors inline-block">
-          Volver a la tienda
-        </Link>
       </div>
     );
   }
