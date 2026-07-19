@@ -49,7 +49,6 @@ export default function AutoCarousel({ products }: { products: any[] }) {
     animationFrameId = requestAnimationFrame(scrollStep);
 
     return () => cancelAnimationFrame(animationFrameId);
-    return () => cancelAnimationFrame(animationFrameId);
   }, [isHovered, isDragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {

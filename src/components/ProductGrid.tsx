@@ -57,7 +57,7 @@ export default async function ProductGrid() {
               <h3 className="font-semibold text-lg mb-1 line-clamp-2">{product.name}</h3>
             </Link>
             <div className="mt-auto pt-4 flex items-center justify-between">
-              <p className="text-gray-900 font-bold text-lg" dangerouslySetInnerHTML={{ __html: product.price_html }}></p>
+              <p className="text-gray-900 font-bold text-lg" dangerouslySetInnerHTML={{ __html: typeof product.price_html === 'string' ? product.price_html : '' }}></p>
               <Link 
                 href={`/product/${product.id}`}
                 className="bg-black text-white px-4 py-2 rounded font-medium hover:bg-gray-800 transition-colors text-sm"

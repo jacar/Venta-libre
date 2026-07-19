@@ -126,7 +126,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               <div className="text-sm text-gray-500 font-bold mb-1">Precio Especial:</div>
               <div 
                 className="text-4xl font-black text-[#e52e04]" 
-                dangerouslySetInnerHTML={{ __html: product.price_html }} 
+                dangerouslySetInnerHTML={{ __html: typeof product.price_html === 'string' ? product.price_html : '' }} 
               />
             </div>
             
