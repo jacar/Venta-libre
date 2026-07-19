@@ -257,7 +257,9 @@ export default async function Home() {
                 )}
               </div>
               <div className="text-gray-300 mb-8 line-clamp-3 text-sm md:text-base leading-relaxed" 
-                 dangerouslySetInnerHTML={{ __html: typeof randomFeaturedProduct.short_description === 'string' ? randomFeaturedProduct.short_description : 'No te pierdas nuestra recomendación estrella del día. Calidad premium al mejor precio.' }}>
+                 dangerouslySetInnerHTML={{ __html: typeof randomFeaturedProduct.short_description === 'string' 
+                   ? randomFeaturedProduct.short_description.replace(/<p>[^>]*Aquí tienes el texto optimizado[^<]*libre de emojis:[^<]*<\/p>/gis, '').replace(/Aquí tienes el texto optimizado.*?libre de emojis:/gis, '') 
+                   : 'No te pierdas nuestra recomendación estrella del día. Calidad premium al mejor precio.' }}>
               </div>
               
               <Link 

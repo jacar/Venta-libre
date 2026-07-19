@@ -158,18 +158,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             {(() => {
               // Limpiar textos indeseados (IA) de la descripción
               let displayDescription = product.description || "No hay descripción disponible.";
-              const unwantedTexts = [
-                "Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:",
-                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:</p>",
-                "Aquí tienes el texto optimizado y estructurado de forma profesional para tu catálogo o plataforma de e-commerce, manteniendo un diseño limpio, una lectura clara de las políticas y completamente libre de emojis:",
-                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para tu catálogo o plataforma de e-commerce, manteniendo un diseño limpio, una lectura clara de las políticas y completamente libre de emojis:</p>"
-              ];
-              
-              unwantedTexts.forEach(text => {
-                // Remove exact matches (case insensitive)
-                const regex = new RegExp(text, 'gi');
-                displayDescription = displayDescription.replace(regex, '');
-              });
+              // Eliminar párrafos generados por IA usando expresiones regulares robustas
+              // que capturan todo desde "Aquí tienes el texto" hasta "emojis:" (incluyendo etiquetas HTML si las hay)
+              displayDescription = displayDescription.replace(/<p>[^>]*Aquí tienes el texto optimizado[^<]*libre de emojis:[^<]*<\/p>/gis, '');
+              displayDescription = displayDescription.replace(/Aquí tienes el texto optimizado.*?libre de emojis:/gis, '');
+
 
               return (
                 <div className="mt-12">
