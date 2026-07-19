@@ -20,8 +20,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    cpus: 1,
-    workerThreads: false,
     memoryBasedWorkersCount: true,
   },
   async headers() {
