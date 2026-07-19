@@ -16,11 +16,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
-  },
-  experimental: {
-    memoryBasedWorkersCount: true,
   },
   async headers() {
     return [
