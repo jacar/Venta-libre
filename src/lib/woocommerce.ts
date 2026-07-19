@@ -8,7 +8,10 @@ export const api = new WooCommerceRestApi({
   consumerKey: process.env.WOOCOMMERCE_KEY || "",
   consumerSecret: process.env.WOOCOMMERCE_SECRET || "",
   version: "wc/v3",
-  queryStringAuth: !isHttps
+  queryStringAuth: !isHttps,
+  axiosConfig: {
+    timeout: 15000, // 15 segundos máximo para evitar que Netlify de timeout de 60s
+  }
 });
 
 // Función helper para limpiar el JSON inyectado con comentarios HTML
@@ -86,12 +89,11 @@ api.get = async function (endpoint: string, params?: any) {
     }
     return response;
   } catch (error: any) {
-    if (error.response && error.response.status === 404) {
-      // Evitar que el 404 rompa la consola o las páginas
-      console.warn(`[WooCommerce API] 404 Ruta no encontrada: ${endpoint}`);
-      return { data: [] }; 
-    }
-    throw error;
+    console.error(`[WooCommerce API] Error en ${endpoint}:`, error.message || error);
+    
+    // Fallback absoluto: Si Cloudflare bloquea a Netlify o hay un timeout, 
+    // no crasheamos la página ni el build, simplemente devolvemos vacío.
+    return { data: [] };
   }
 };
 
