@@ -155,13 +155,30 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               );
             })()}
 
-            <div className="mt-12">
-              <h3 className="font-bold text-gray-900 border-b pb-2 mb-4">Descripción del Producto</h3>
-              <div 
-                className="prose prose-sm prose-gray max-w-none text-gray-700 text-sm"
-                dangerouslySetInnerHTML={{ __html: product.description || "No hay descripción disponible." }}
-              />
-            </div>
+            {(() => {
+              // Limpiar textos indeseados (IA) de la descripción
+              let displayDescription = product.description || "No hay descripción disponible.";
+              const unwantedTexts = [
+                "Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:",
+                "<p>Aquí tienes el texto optimizado y estructurado de forma profesional para la descripción del producto en tu tienda, manteniendo el formato limpio y completamente libre de emojis:</p>"
+              ];
+              
+              unwantedTexts.forEach(text => {
+                // Remove exact matches (case insensitive)
+                const regex = new RegExp(text, 'gi');
+                displayDescription = displayDescription.replace(regex, '');
+              });
+
+              return (
+                <div className="mt-12">
+                  <h3 className="font-bold text-gray-900 border-b pb-2 mb-4">Descripción del Producto</h3>
+                  <div 
+                    className="prose prose-sm prose-gray max-w-none text-gray-700 text-sm"
+                    dangerouslySetInnerHTML={{ __html: displayDescription }}
+                  />
+                </div>
+              );
+            })()}
 
             {/* Información Técnica y Atributos (Extraída de WordPress) */}
             <div className="mt-8 border border-gray-100 rounded-lg p-5 bg-gray-50">
