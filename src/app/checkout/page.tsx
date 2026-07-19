@@ -6,14 +6,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatCOP } from "@/lib/formatPrice";
 
+import { useSession } from "next-auth/react";
+
 export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
   const router = useRouter();
+  const { data: session, status } = useSession();
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+
+  // Redirigir al login si no está autenticado
+  if (typeof window !== "undefined" && status === "unauthenticated") {
+    router.push("/login?callbackUrl=/checkout");
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fb7701]"></div>
+      </div>
+    );
+  }
 
   const [formData, setFormData] = useState({
     phone: "",
