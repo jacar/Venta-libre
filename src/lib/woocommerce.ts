@@ -13,7 +13,7 @@ export const api = new WooCommerceRestApi({
   version: "wc/v3",
   queryStringAuth: !isHttps,
   axiosConfig: {
-    timeout: 5000, // 5 segundos máximo para evitar sumar 60s en llamados secuenciales
+    timeout: 15000, // 15 segundos máximo para evitar sumar 60s en llamados secuenciales
   }
 });
 
