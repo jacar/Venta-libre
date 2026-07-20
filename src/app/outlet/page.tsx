@@ -181,21 +181,58 @@ async function getOutletData() {
         console.error("Error fetching cool products:", e);
     }
 
-    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts, coolProducts };
+    // Get products for "Para Ellas"
+    let paraEllasProducts = [];
+    try {
+        const ellasCategories = allCategories.filter((c: any) => 
+            c.name.toLowerCase().includes("mujer") || 
+            c.name.toLowerCase().includes("dama") ||
+            c.name.toLowerCase().includes("femenina")
+        );
+        
+        let targetIds = ellasCategories.map((c: any) => c.id).join(",");
+        if (targetIds) {
+            const res = await api.get("products", { category: targetIds, per_page: 8, status: "publish", orderby: "date", order: "desc" });
+            paraEllasProducts = Array.isArray(res.data) ? res.data : [];
+        } else {
+            const res = await api.get("products", { search: "mujer", per_page: 8, status: "publish" });
+            paraEllasProducts = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch(e) {}
+
+    return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts, coolProducts, paraEllasProducts };
   } catch (error) {
     console.error("[Outlet] Error al obtener datos:", error);
-    return { categories: [], featuredProducts: [], products: [], catProducts: [], deportivosProducts: [], coolProducts: [] };
+    return { categories: [], featuredProducts: [], products: [], catProducts: [], deportivosProducts: [], coolProducts: [], paraEllasProducts: [] };
   }
 }
 
 export default async function OutletPage() {
-  const { categories, featuredProducts, products, catProducts, deportivosProducts, coolProducts } = await getOutletData();
+  const { categories, featuredProducts, products, catProducts, deportivosProducts, coolProducts, paraEllasProducts } = await getOutletData();
 
   return (
     <div className="bg-white min-h-screen font-sans text-gray-900 selection:bg-black selection:text-white">
       
       {/* 1. Hero Slider (Estilo VITA) */}
       <OutletHeroSlider backgroundImage="/sli.jpg" />
+
+      {/* 1.2 COLECCIÓN PARA ELLAS (SUPER PREMIUM) */}
+      {paraEllasProducts.length > 0 && (
+          <section className="py-16 lg:py-24 px-4 lg:px-6 max-w-[1400px] mx-auto border-b border-gray-100">
+              <div className="flex flex-col items-center text-center mb-16">
+                  <span className="text-[#fb7701] md:text-[#d4af37] text-[10px] md:text-xs font-black tracking-[0.3em] uppercase mb-4 bg-orange-50 md:bg-[#fbf9f1] px-4 py-1.5 rounded-full border border-orange-100 md:border-[#d4af37]/30">
+                    Colección Exclusiva
+                  </span>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-gray-900 mb-6" style={{ fontFamily: 'var(--font-groote), sans-serif' }}>
+                    PARA ELLAS
+                  </h2>
+                  <p className="max-w-2xl text-gray-500 text-sm md:text-base leading-relaxed px-4">
+                      Porque sabemos que mereces lo mejor. Hemos seleccionado cuidadosamente esta colección pensando en tu comodidad, elegancia y estilo único. Descubre piezas exclusivas que realzan tu esencia en cada paso.
+                  </p>
+              </div>
+              <ElegantProductGrid products={paraEllasProducts} />
+          </section>
+      )}
 
       {/* 1.5. Sección Elegante de Productos (Carrusel Interactivo) */}
       <LooksDestacados />
