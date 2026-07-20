@@ -26,7 +26,7 @@ export default function OutletHeroSlider({
       <div className="absolute top-0 left-0 w-full md:w-[60%] h-full bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10"></div>
 
       <div className="max-w-[1400px] mx-auto h-full relative z-10 px-6 sm:px-12 md:px-20 flex flex-col justify-center">
-          <h1 className="text-5xl md:text-[72px] font-extrabold tracking-[-0.02em] text-black max-w-2xl leading-[1.05] mb-6 whitespace-pre-line drop-shadow-sm">
+          <h1 className="text-[11vw] min-[400px]:text-5xl md:text-[72px] font-extrabold tracking-[-0.02em] text-black max-w-2xl leading-[1.05] mb-6 whitespace-pre-line drop-shadow-sm break-words">
               NUEVA{'\n'}COLECCIÓN
           </h1>
           <p className="text-base md:text-lg text-black/80 max-w-md mb-10 font-light tracking-wide drop-shadow-sm leading-relaxed">
