@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatCOP } from "@/lib/formatPrice";
@@ -15,6 +15,13 @@ export default function ParaEllasCarousel({ products }: { products: any[] }) {
     seconds: 56
   });
 
+  // Carousel state
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isDown, setIsDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
+
+  // Timer logic
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -37,6 +44,21 @@ export default function ParaEllasCarousel({ products }: { products: any[] }) {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Autoplay logic
+  useEffect(() => {
+    const autoplay = setInterval(() => {
+      if (carouselRef.current && !isDown) {
+        const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+        if (scrollLeft >= scrollWidth - clientWidth - 1) {
+          carouselRef.current.scrollLeft = 0;
+        } else {
+          carouselRef.current.scrollLeft += 1;
+        }
+      }
+    }, 25);
+    return () => clearInterval(autoplay);
+  }, [isDown]);
 
   if (!products || products.length === 0) return null;
 
@@ -103,8 +125,25 @@ export default function ParaEllasCarousel({ products }: { products: any[] }) {
           </div>
 
           {/* Carousel */}
-          <div className="px-6 lg:px-10 w-full overflow-x-auto pb-4 hide-scrollbar">
-            <div className="flex gap-4 lg:gap-6 w-max">
+          <div 
+            ref={carouselRef}
+            className={`px-6 lg:px-10 w-full overflow-x-auto pb-4 hide-scrollbar select-none ${isDown ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={(e) => {
+              setIsDown(true);
+              setStartX(e.pageX - carouselRef.current!.offsetLeft);
+              setScrollLeftState(carouselRef.current!.scrollLeft);
+            }}
+            onMouseLeave={() => setIsDown(false)}
+            onMouseUp={() => setIsDown(false)}
+            onMouseMove={(e) => {
+              if (!isDown) return;
+              e.preventDefault();
+              const x = e.pageX - carouselRef.current!.offsetLeft;
+              const walk = (x - startX) * 2; 
+              carouselRef.current!.scrollLeft = scrollLeftState - walk;
+            }}
+          >
+            <div className="flex gap-4 lg:gap-6 w-max pointer-events-auto">
               {products.map((product) => {
                 const price = product.price || "0";
                 

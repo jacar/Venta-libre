@@ -138,9 +138,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
 
             {(() => {
-              // Comprobamos si la categoría está relacionada con ropa o calzado
+              // Comprobamos si es un producto de calzado
               const categoryNames = product.categories ? product.categories.map((c: any) => c.name.toLowerCase()).join(" ") : "";
-              const requireNote = categoryNames.includes("ropa") || categoryNames.includes("calzado") || categoryNames.includes("zapatos") || categoryNames.includes("hombre") || categoryNames.includes("mujer") || categoryNames.includes("niño") || categoryNames.includes("bebe");
+              const productName = product.name.toLowerCase();
+              const isFootwear = categoryNames.includes("calzado") || categoryNames.includes("zapato") || categoryNames.includes("tenis") || productName.includes("tenis") || productName.includes("zapato") || productName.includes("calzado") || productName.includes("botas");
 
               return (
                 <AddToCartButton 
@@ -149,8 +150,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     name: product.name,
                     price: priceNum,
                     image: (product.images && product.images[0]) ? product.images[0].src : "",
+                    description: product.description || product.short_description || "",
                   }} 
-                  requireNote={requireNote}
+                  images={product.images ? product.images.map((img: any) => img.src) : []}
+                  isFootwear={isFootwear}
+                  attributes={product.attributes}
                 />
               );
             })()}
