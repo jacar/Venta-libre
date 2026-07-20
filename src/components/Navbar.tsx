@@ -103,7 +103,16 @@ export default function Navbar({ categories = [] }: { categories?: any[] }) {
 
           {/* Search Bar - Big Temu Style */}
           <div className="order-3 lg:order-2 w-full lg:w-auto lg:flex-1 max-w-3xl flex relative" ref={searchContainerRef}>
-            <div className="flex w-full border-2 border-[#fb7701] rounded-full overflow-hidden bg-white hover:shadow-md transition-shadow relative">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim().length >= 3) {
+                  setSearchResults([]); // close autocomplete
+                  router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                }
+              }}
+              className="flex w-full border-2 border-[#fb7701] rounded-full overflow-hidden bg-white hover:shadow-md transition-shadow relative"
+            >
               <input 
                 type="text" 
                 placeholder="Busca productos, marcas y más..." 
@@ -111,11 +120,11 @@ export default function Navbar({ categories = [] }: { categories?: any[] }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="bg-[#fb7701] text-white px-8 py-2.5 font-bold hover:bg-[#e06a01] transition-colors flex items-center gap-2">
+              <button type="submit" className="bg-[#fb7701] text-white px-8 py-2.5 font-bold hover:bg-[#e06a01] transition-colors flex items-center gap-2">
                 <Search className="w-5 h-5" />
                 <span className="hidden sm:inline">Buscar</span>
               </button>
-            </div>
+            </form>
             
             {/* Dropdown de Búsqueda */}
             {(searchQuery.length >= 3 && (isSearching || searchResults.length > 0)) && (
