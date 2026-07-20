@@ -12,6 +12,7 @@ import ElegantProductGrid from "@/components/ElegantProductGrid";
 import SportsProductGrid from "@/components/SportsProductGrid";
 
 export const revalidate = 60;
+import ParaEllasCarousel from "@/components/ParaEllasCarousel";
 
 async function getOutletData() {
   try {
@@ -43,162 +44,82 @@ async function getOutletData() {
                slug.includes("moda") || slug.includes("ropa") || slug.includes("accesorio");
     }).slice(0, 6);
 
-    // Set para evitar productos duplicados en toda la página
-    const seenIds = new Set();
-
-    // Get products for the featured category (Moda, ropa y accesorios)
-    const featuredCatIds = featuredCategories.map((c: any) => c.id).join(",");
-    let featuredProducts = [];
-    if (featuredCatIds) {
-        const featProdResponse = await api.get("products", {
-            category: featuredCatIds,
-            per_page: 50,
-            status: "publish",
-            orderby: "date",
-            order: "desc"
-        });
-        featuredProducts = Array.isArray(featProdResponse.data) ? featProdResponse.data : [];
+    // Promises for concurrent fetching
+    let featPromise = Promise.resolve({ data: [] });
+    if (featuredCategories.map((c: any) => c.id).join(",")) {
+        featPromise = api.get("products", { category: featuredCategories.map((c: any) => c.id).join(","), per_page: 50, status: "publish", orderby: "date", order: "desc" });
     }
 
-    // Get products for "CALZADOS REPLICAS AAA"
     const calzadoCategories = allCategories.filter((c: any) => {
         const name = c.name.toLowerCase();
         const slug = c.slug.toLowerCase();
         return name.includes("calzado") || name.includes("tenis") || name.includes("zapato") || slug.includes("calzado") || slug.includes("tenis") || slug.includes("zapato");
     });
-    
     const categoryIds = calzadoCategories.length > 0 ? calzadoCategories.map((c: any) => c.id).join(",") : targetCategories.map((c: any) => c.id).join(",");
-    let allProducts = [];
+    let calzadoPromise = Promise.resolve({ data: [] });
     if (categoryIds) {
-        const prodResponse = await api.get("products", {
-            category: categoryIds,
-            per_page: 100, // Fetch all possible footwear
-            status: "publish",
-            orderby: "date",
-            order: "desc"
-        });
-        let fetchedProducts = Array.isArray(prodResponse.data) ? prodResponse.data : [];
-        
-        // Remove products that are already shown in the featured category to prevent duplicates
-        featuredProducts.forEach((p: any) => seenIds.add(p.id));
-        allProducts = fetchedProducts.filter((p: any) => {
-            if (seenIds.has(p.id)) return false;
-            // Ensure it's footwear if we had to fallback to targetCategories
-            if (calzadoCategories.length === 0) {
-                const name = p.name.toLowerCase();
-                return name.includes("tenis") || name.includes("calzado") || name.includes("zapato") || name.includes("bota");
-            }
-            return true;
-        });
+        calzadoPromise = api.get("products", { category: categoryIds, per_page: 100, status: "publish", orderby: "date", order: "desc" });
     }
 
-    // Get products for "Cat"
-    let catProducts = [];
     const catCategories = allCategories.filter((c: any) => c.name.toLowerCase() === "cat" || c.name.toLowerCase() === "bota cat" || c.name.toLowerCase().includes("cat "));
-    
-    // First try by explicit category, otherwise fallback to text search
-    if (catCategories.length > 0) {
-        const catCatIds = catCategories.map((c: any) => c.id).join(",");
-        const catResponse = await api.get("products", {
-            category: catCatIds,
-            per_page: 50,
-            status: "publish",
-            orderby: "date",
-            order: "desc"
-        });
-        catProducts = Array.isArray(catResponse.data) ? catResponse.data : [];
-    } else {
-        const catResponse = await api.get("products", {
-            search: "cat",
-            per_page: 50,
-            status: "publish"
-        });
-        catProducts = Array.isArray(catResponse.data) ? catResponse.data : [];
-    }
+    let catPromise = catCategories.length > 0 
+        ? api.get("products", { category: catCategories.map((c: any) => c.id).join(","), per_page: 50, status: "publish", orderby: "date", order: "desc" })
+        : api.get("products", { search: "cat", per_page: 50, status: "publish" });
 
-    // Filtrar los que ya se mostraron en secciones destacadas (pero NO allProducts para no vaciar estas galerías)
-    catProducts = catProducts.filter((p: any) => {
+    const depPromise = api.get("products", { category: "75", per_page: 12, status: "publish", orderby: "date", order: "desc" });
+
+    const coolCategories = allCategories.filter((c: any) => c.name.toLowerCase().includes("cool") || c.slug.toLowerCase().includes("cool"));
+    let coolPromise = coolCategories.length > 0
+        ? api.get("products", { category: coolCategories.map((c: any) => c.id).join(","), per_page: 20, status: "publish", orderby: "date", order: "desc" })
+        : api.get("products", { search: "cool", per_page: 20, status: "publish" });
+
+    const ellasCategories = allCategories.filter((c: any) => c.name.toLowerCase() === "para ellas");
+    let ellasPromise = ellasCategories.length > 0
+        ? api.get("products", { category: ellasCategories.map((c: any) => c.id).join(","), per_page: 12, status: "publish", orderby: "date", order: "desc" })
+        : Promise.resolve({ data: [] });
+
+    // Ejecutar todas las llamadas a la API de forma concurrente (¡mucho más rápido!)
+    const results = await Promise.allSettled([featPromise, calzadoPromise, catPromise, depPromise, coolPromise, ellasPromise]);
+
+    const extractData = (res: any) => res.status === "fulfilled" && Array.isArray(res.value?.data) ? res.value.data : [];
+    
+    let featuredProducts = extractData(results[0]);
+    let fetchedAllProducts = extractData(results[1]);
+    let rawCatProducts = extractData(results[2]);
+    let rawDeportivos = extractData(results[3]);
+    let rawCool = extractData(results[4]);
+    let paraEllasProducts = extractData(results[5]);
+
+    // Filtrar duplicados con un Set
+    const seenIds = new Set();
+    featuredProducts.forEach((p: any) => seenIds.add(p.id));
+
+    let allProducts = fetchedAllProducts.filter((p: any) => {
+        if (seenIds.has(p.id)) return false;
+        if (calzadoCategories.length === 0) {
+            const name = p.name.toLowerCase();
+            return name.includes("tenis") || name.includes("calzado") || name.includes("zapato") || name.includes("bota");
+        }
+        return true;
+    });
+
+    let catProducts = rawCatProducts.filter((p: any) => {
         if (seenIds.has(p.id)) return false;
         seenIds.add(p.id);
         return true;
     });
 
-    // Get products for "Deportivos" y "Deportes"
-    // IDs exactos de WooCommerce: 52=Deportes (11 products), 75=Deportivos (4 products)
-    let deportivosProducts = [];
-    try {
-        const depResponse = await api.get("products", {
-            category: "75", // Deportivos (ID 75) — calzado deportivo/atlético
-            per_page: 12,
-            status: "publish",
-            orderby: "date",
-            order: "desc"
-        });
-        let rawDeportivos = Array.isArray(depResponse.data) ? depResponse.data : [];
-        deportivosProducts = rawDeportivos.filter((p: any) => {
-            if (seenIds.has(p.id)) return false;
-            seenIds.add(p.id);
-            return true;
-        });
-    } catch (e) {
-        console.error("Error fetching deportivos:", e);
-    }
+    let deportivosProducts = rawDeportivos.filter((p: any) => {
+        if (seenIds.has(p.id)) return false;
+        seenIds.add(p.id);
+        return true;
+    });
 
-    // Get products for "Cool"
-    let coolProducts = [];
-    try {
-        const coolCategories = allCategories.filter((c: any) => c.name.toLowerCase().includes("cool") || c.slug.toLowerCase().includes("cool"));
-        
-        if (coolCategories.length > 0) {
-            const coolCatIds = coolCategories.map((c: any) => c.id).join(",");
-            const coolResponse = await api.get("products", {
-                category: coolCatIds,
-                per_page: 20,
-                status: "publish",
-                orderby: "date",
-                order: "desc"
-            });
-            let rawCool = Array.isArray(coolResponse.data) ? coolResponse.data : [];
-            coolProducts = rawCool.filter((p: any) => {
-                if (seenIds.has(p.id)) return false;
-                seenIds.add(p.id);
-                return true;
-            });
-        } else {
-            const coolResponse = await api.get("products", {
-                search: "cool",
-                per_page: 20,
-                status: "publish"
-            });
-            let rawCool = Array.isArray(coolResponse.data) ? coolResponse.data : [];
-            coolProducts = rawCool.filter((p: any) => {
-                if (seenIds.has(p.id)) return false;
-                seenIds.add(p.id);
-                return true;
-            });
-        }
-    } catch (e) {
-        console.error("Error fetching cool products:", e);
-    }
-
-    // Get products for "Para Ellas"
-    let paraEllasProducts = [];
-    try {
-        const ellasCategories = allCategories.filter((c: any) => 
-            c.name.toLowerCase().includes("mujer") || 
-            c.name.toLowerCase().includes("dama") ||
-            c.name.toLowerCase().includes("femenina")
-        );
-        
-        let targetIds = ellasCategories.map((c: any) => c.id).join(",");
-        if (targetIds) {
-            const res = await api.get("products", { category: targetIds, per_page: 8, status: "publish", orderby: "date", order: "desc" });
-            paraEllasProducts = Array.isArray(res.data) ? res.data : [];
-        } else {
-            const res = await api.get("products", { search: "mujer", per_page: 8, status: "publish" });
-            paraEllasProducts = Array.isArray(res.data) ? res.data : [];
-        }
-    } catch(e) {}
+    let coolProducts = rawCool.filter((p: any) => {
+        if (seenIds.has(p.id)) return false;
+        seenIds.add(p.id);
+        return true;
+    });
 
     return { categories: featuredCategories, featuredProducts, products: allProducts, catProducts, deportivosProducts, coolProducts, paraEllasProducts };
   } catch (error) {
@@ -216,23 +137,8 @@ export default async function OutletPage() {
       {/* 1. Hero Slider (Estilo VITA) */}
       <OutletHeroSlider backgroundImage="/sli.jpg" />
 
-      {/* 1.2 COLECCIÓN PARA ELLAS (SUPER PREMIUM) */}
-      {paraEllasProducts.length > 0 && (
-          <section className="py-16 lg:py-24 px-4 lg:px-6 max-w-[1400px] mx-auto border-b border-gray-100">
-              <div className="flex flex-col items-center text-center mb-16">
-                  <span className="text-[#fb7701] md:text-[#d4af37] text-[10px] md:text-xs font-black tracking-[0.3em] uppercase mb-4 bg-orange-50 md:bg-[#fbf9f1] px-4 py-1.5 rounded-full border border-orange-100 md:border-[#d4af37]/30">
-                    Colección Exclusiva
-                  </span>
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-gray-900 mb-6" style={{ fontFamily: 'var(--font-groote), sans-serif' }}>
-                    PARA ELLAS
-                  </h2>
-                  <p className="max-w-2xl text-gray-500 text-sm md:text-base leading-relaxed px-4">
-                      Porque sabemos que mereces lo mejor. Hemos seleccionado cuidadosamente esta colección pensando en tu comodidad, elegancia y estilo único. Descubre piezas exclusivas que realzan tu esencia en cada paso.
-                  </p>
-              </div>
-              <ElegantProductGrid products={paraEllasProducts} />
-          </section>
-      )}
+      {/* 1.2 COLECCIÓN PARA ELLAS (FLASH SALE) */}
+      <ParaEllasCarousel products={paraEllasProducts} />
 
       {/* 1.5. Sección Elegante de Productos (Carrusel Interactivo) */}
       <LooksDestacados />
