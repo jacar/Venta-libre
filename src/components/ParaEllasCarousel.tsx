@@ -159,7 +159,7 @@ export default function ParaEllasCarousel({ products }: { products: any[] }) {
                     </div>
 
                     {/* Image Container with Hover Overlay */}
-                    <div className="relative aspect-square w-full mb-4 overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center">
+                    <Link href={`/product/${product.id}`} className="relative aspect-square w-full mb-4 overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center cursor-pointer block">
                       {product.images && product.images[0] ? (
                         <Image
                           src={product.images[0].src}
@@ -172,13 +172,13 @@ export default function ParaEllasCarousel({ products }: { products: any[] }) {
                         <span className="text-xs text-gray-400">Sin imagen</span>
                       )}
 
-                      {/* Hover Dark Overlay */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Link href={`/product/${product.id}`} className="w-12 h-12 bg-[#c53659] rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300 hover:bg-[#a62c4a]">
+                      {/* Hover Dark Overlay (Solo Desktop) */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 bg-[#c53659] rounded-full flex items-center justify-center transform scale-0 lg:group-hover:scale-100 transition-transform duration-300">
                           <Eye className="w-5 h-5 text-white" />
-                        </Link>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Card Footer */}
                     <div className="mt-auto relative z-10">

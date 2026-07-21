@@ -1,7 +1,7 @@
 import { api } from "@/lib/woocommerce";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ArrowLeft } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -48,9 +48,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         
         {/* Título de sección agresivo */}
         <div className="bg-white px-4 py-3 border-b border-gray-200 flex items-center justify-between rounded-t-lg shadow-sm">
-          <h1 className="text-gray-900 font-black text-2xl uppercase tracking-tighter flex items-center gap-2">
-            {category.name}
-          </h1>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-gray-400 hover:text-black transition-colors" title="Regresar al inicio">
+              <ArrowLeft className="w-6 h-6" />
+            </Link>
+            <h1 className="text-gray-900 font-black text-2xl uppercase tracking-tighter flex items-center gap-2">
+              {category.name}
+            </h1>
+          </div>
           <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded-full">{products.length} productos</span>
         </div>
 
