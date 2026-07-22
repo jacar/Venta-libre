@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { api } from "@/lib/woocommerce";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // 1. Creamos la orden en estado 'processing' (confirmado)
+    // 1. Creamos la orden en estado 'processing' (COD) o 'pending' (Pago anticipado)
     const data = {
       payment_method: body.paymentMethod || "cod",
-      payment_method_title: body.paymentMethod === "prepaid" ? "Pago anticipado" : "Pago contra entrega",
-      status: "processing", 
-      set_paid: body.paymentMethod === "prepaid",
+      payment_method_title: body.paymentMethod === "prepaid" ? "Pago anticipado (Wompi)" : "Pago contra entrega",
+      status: body.paymentMethod === "prepaid" ? "pending" : "processing", 
+      set_paid: false, // Se marcará como pagado mediante el webhook de Wompi
       billing: body.billing,
       shipping: body.shipping,
       line_items: body.line_items,
@@ -186,10 +187,40 @@ export async function POST(request: Request) {
       }
     };
 
-    // Ejecutar ambas tareas en paralelo para evitar timeout y reducir el tiempo de carga
-    await Promise.allSettled([syncMasterShop(), notifyWhatsApp()]);
-    
-    return NextResponse.json({ success: true, orderId: orderId });
+    // 4. Lógica condicional: Si es prepago, generamos el enlace de Wompi. Si es COD, enviamos a Mastershop/WhatsApp.
+    if (body.paymentMethod === "prepaid") {
+      const reference = `ORDER-${orderId}-${Date.now()}`;
+      const amountInCents = Math.round(parseFloat(createdOrder.total || "0") * 100);
+      const currency = "COP";
+      const integritySecret = process.env.WOMPI_INTEGRITY_SECRET || "";
+      const publicKey = process.env.WOMPI_PUBLIC_KEY || "";
+      
+      const hashString = `${reference}${amountInCents}${currency}${integritySecret}`;
+      const signature = crypto.createHash('sha256').update(hashString).digest('hex');
+      
+      // Guardamos la referencia de Wompi en la orden para cruzarla luego en el Webhook
+      await api.put(`orders/${orderId}`, {
+        meta_data: [
+          { key: "_wompi_reference", value: reference }
+        ]
+      });
+
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      
+      let paymentUrl = `https://checkout.wompi.co/p/?public-key=${publicKey}&currency=${currency}&amount-in-cents=${amountInCents}&reference=${reference}&signature:integrity=${signature}`;
+      
+      // El firewall de Wompi (CloudFront) bloquea URLs que contengan "localhost" por seguridad (SSRF)
+      if (!baseUrl.includes("localhost")) {
+        const redirectUrl = encodeURIComponent(`${baseUrl}/checkout?wompi_status=redirect`);
+        paymentUrl += `&redirect-url=${redirectUrl}`;
+      }
+
+      return NextResponse.json({ success: true, orderId: orderId, paymentUrl: paymentUrl });
+    } else {
+      // Ejecutar ambas tareas en paralelo (Solo para Pago Contra Entrega)
+      await Promise.allSettled([syncMasterShop(), notifyWhatsApp()]);
+      return NextResponse.json({ success: true, orderId: orderId });
+    }
   } catch (error: any) {
     console.error("Error creating order:", error.response?.data || error.message);
     return NextResponse.json(

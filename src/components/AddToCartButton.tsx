@@ -1,8 +1,9 @@
 "use client";
 
 import { useCartStore } from "@/store/useCartStore";
-import { ShoppingCart, Minus, Plus } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Truck } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface AddToCartButtonProps {
   product: {
@@ -64,6 +65,7 @@ function extractSizesFromDescription(text?: string): string[] {
 
 export default function AddToCartButton({ product, isFootwear = false, attributes = [] }: AddToCartButtonProps) {
   const { addToCart, toggleCart } = useCartStore();
+  const router = useRouter();
   const [added, setAdded] = useState(false);
   const [note, setNote] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -111,6 +113,19 @@ export default function AddToCartButton({ product, isFootwear = false, attribute
     setAdded(true);
     toggleCart(); 
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    let finalNote = note;
+    
+    // Combine selected attributes into the note
+    if (finalAttributes && finalAttributes.length > 0) {
+      const attrStrings = Object.entries(selectedAttributes).map(([key, val]) => `${key}: ${val}`);
+      finalNote = attrStrings.join(" | ") + (note ? ` | Nota: ${note}` : "");
+    }
+
+    addToCart({ ...product, note: finalNote }, quantity);
+    router.push("/checkout");
   };
 
   const hasAttributes = finalAttributes && finalAttributes.length > 0;
@@ -162,30 +177,40 @@ export default function AddToCartButton({ product, isFootwear = false, attribute
       </div>
 
       {/* Quantity and Add to Cart */}
-      <div className="flex items-center gap-3">
-        {/* Quantity Selector */}
-        <div className="flex items-center border-2 border-gray-200 rounded-xl bg-white shrink-0 h-[56px]">
-          <button 
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="w-12 h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500 rounded-l-xl"
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          {/* Quantity Selector */}
+          <div className="flex items-center border-2 border-gray-200 rounded-xl bg-white shrink-0 h-[56px]">
+            <button 
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="w-12 h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500 rounded-l-xl"
+            >
+              <Minus className="w-5 h-5" />
+            </button>
+            <span className="w-10 text-center font-black text-lg select-none">{quantity}</span>
+            <button 
+              onClick={() => setQuantity(quantity + 1)}
+              className="w-12 h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500 rounded-r-xl"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+
+          <button
+            onClick={handleAdd}
+            className="flex-grow bg-[#fb7701] text-white h-[56px] rounded-xl font-black text-lg hover:bg-[#e52e04] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-orange-200/50"
           >
-            <Minus className="w-5 h-5" />
-          </button>
-          <span className="w-10 text-center font-black text-lg select-none">{quantity}</span>
-          <button 
-            onClick={() => setQuantity(quantity + 1)}
-            className="w-12 h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500 rounded-r-xl"
-          >
-            <Plus className="w-5 h-5" />
+            <ShoppingCart className="w-6 h-6" />
+            {added ? "¡Añadido!" : "Añadir al carrito"}
           </button>
         </div>
 
         <button
-          onClick={handleAdd}
-          className="flex-grow bg-[#fb7701] text-white h-[56px] rounded-xl font-black text-lg hover:bg-[#e52e04] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-orange-200/50"
+          onClick={handleBuyNow}
+          className="w-full bg-green-500 text-white h-[56px] rounded-xl font-black text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-200/50"
         >
-          <ShoppingCart className="w-6 h-6" />
-          {added ? "¡Añadido!" : "Añadir al carrito"}
+          <Truck className="w-6 h-6" />
+          Comprar con Pago Contra Entrega
         </button>
       </div>
     </div>

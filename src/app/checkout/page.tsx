@@ -18,19 +18,6 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
 
-  // Redirigir al login si no está autenticado
-  if (typeof window !== "undefined" && status === "unauthenticated") {
-    router.push("/login?callbackUrl=/checkout");
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fb7701]"></div>
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState({
     phone: "",
     email: "",
@@ -47,6 +34,19 @@ export default function CheckoutPage() {
     paymentMethod: "cod"
   });
 
+  // Redirigir al login si no está autenticado
+  if (typeof window !== "undefined" && status === "unauthenticated") {
+    router.push("/login?callbackUrl=/checkout");
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fb7701]"></div>
+      </div>
+    );
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -57,6 +57,9 @@ export default function CheckoutPage() {
   };
 
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const isWompiSuccess = searchParams?.get("wompi_status") === "redirect";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,15 +116,22 @@ export default function CheckoutPage() {
       const data = await res.json();
       
       if (data.success) {
+        if (data.paymentUrl) {
+          // Redirigir a Wompi para pagar y vaciar carrito
+          clearCart();
+          window.location.href = data.paymentUrl;
+          return;
+        }
+
         setSuccess(true);
         setOrderId(data.orderId);
         
-        // Desplegar mensaje de WhatsApp automáticamente (usando href para evitar bloqueador de ventanas emergentes)
+        // Desplegar mensaje de WhatsApp automáticamente para Pago contra entrega
         const phoneNumber = "573052891719";
-        const textMessage = `¡Hola! Acabo de realizar un nuevo pedido.\n\n*Número de pedido:* #${data.orderId}\n*Nombre:* ${formData.firstName} ${formData.lastName}\n*Documento:* ${formData.documentNumber}\n*Total:* ${formatCOP(total)}\n\nQuedo atento(a).`;
+        const textMessage = `¡Hola! Acabo de realizar un nuevo pedido.\n\n*Número de pedido:* #${data.orderId}\n*Nombre:* ${formData.firstName} ${formData.lastName}\n*Documento:* ${formData.documentNumber}\n*Total:* ${formatCOP(total)}\n*Método:* Pago contra entrega\n\nQuedo atento(a).`;
         const encodedMessage = encodeURIComponent(textMessage);
         
-        // Redirigir en la misma pestaña para que navegadores móviles y de PC no lo bloqueen
+        // Redirigir en la misma pestaña
         window.location.href = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
         clearCart();
@@ -135,9 +145,9 @@ export default function CheckoutPage() {
     }
   };
 
-  if (success) {
+  if (success || isWompiSuccess) {
     const phoneNumber = "573052891719";
-    const textMessage = `¡Hola! Acabo de realizar un nuevo pedido.\n\n*Número de pedido:* #${orderId}\n*Nombre:* ${formData.firstName} ${formData.lastName}\n*Documento:* ${formData.documentNumber}\n*Total:* ${formatCOP(total)}\n\nQuedo atento(a).`;
+    const textMessage = `¡Hola! Acabo de realizar un nuevo pedido.\n\n*Número de pedido:* #${orderId || "Generado"}\n*Total:* ${formatCOP(total)}\n\nQuedo atento(a).`;
     const waLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textMessage)}`;
 
     return (
@@ -147,13 +157,17 @@ export default function CheckoutPage() {
             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">¡Gracias por tu compra!</h1>
-          <p className="text-lg text-gray-600 mb-8">Tu pedido #{orderId} ha sido registrado exitosamente.</p>
+          <p className="text-lg text-gray-600 mb-8">
+            {isWompiSuccess 
+              ? "Hemos recibido tu información. Estamos validando el pago con Wompi." 
+              : `Tu pedido #${orderId} ha sido registrado exitosamente.`}
+          </p>
           
           <a 
             href={waLink}
             className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-600 transition-all duration-300 inline-block mb-6 w-full shadow-lg hover:shadow-xl hover:-translate-y-1"
           >
-            Confirmar pedido por WhatsApp
+            Contactar por WhatsApp
           </a>
           <br />
           <Link href="/" className="text-gray-500 hover:text-gray-900 font-bold transition-colors inline-block">
@@ -251,13 +265,29 @@ export default function CheckoutPage() {
 
             <h2 className="text-lg font-bold mb-4 text-gray-800 border-b border-gray-200 pb-3">Método de pago</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <label className={`border rounded-lg p-4 flex items-center cursor-pointer transition-colors ${formData.paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50/50' : 'border-gray-200'}`}>
-                <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleChange} className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300" />
-                <span className="ml-3 font-medium text-gray-900">Pago contra entrega</span>
+              <label className={`border-2 rounded-xl p-4 flex flex-col cursor-pointer transition-all ${formData.paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50/30 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div className="flex items-center">
+                  <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleChange} className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300" />
+                  <span className="ml-3 font-bold text-gray-900">Pago contra entrega</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 ml-7 leading-relaxed">
+                  Pagas al recibir. <span className="font-semibold text-gray-700">La tarifa de envío puede variar</span> dependiendo de tu ciudad.
+                </p>
               </label>
-              <label className={`border rounded-lg p-4 flex items-center cursor-pointer transition-colors ${formData.paymentMethod === 'prepaid' ? 'border-orange-500 bg-orange-50/50' : 'border-gray-200'}`}>
-                <input type="radio" name="paymentMethod" value="prepaid" checked={formData.paymentMethod === 'prepaid'} onChange={handleChange} className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300" />
-                <span className="ml-3 font-medium text-gray-900">Pago anticipado</span>
+
+              <label className={`border-2 rounded-xl p-4 flex flex-col cursor-pointer transition-all relative overflow-hidden ${formData.paymentMethod === 'prepaid' ? 'border-green-500 bg-green-50/50 shadow-md ring-1 ring-green-500' : 'border-gray-200 hover:border-gray-300'}`}>
+                {/* Etiqueta flotante de envío gratis */}
+                <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-sm">
+                  ¡Envío Gratis!
+                </div>
+                
+                <div className="flex items-center mt-1">
+                  <input type="radio" name="paymentMethod" value="prepaid" checked={formData.paymentMethod === 'prepaid'} onChange={handleChange} className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300" />
+                  <span className="ml-3 font-bold text-gray-900">Pago anticipado</span>
+                </div>
+                <p className="text-xs text-green-700/80 mt-2 ml-7 font-medium leading-relaxed">
+                  Paga ahora por Nequi, Daviplata o Bancolombia y el <span className="text-green-700 font-bold">envío te sale completamente GRATIS</span>.
+                </p>
               </label>
             </div>
 
@@ -266,7 +296,7 @@ export default function CheckoutPage() {
             <button 
               type="submit" 
               disabled={loading}
-              className={`w-full py-4 rounded-xl font-bold transition-all outline-none duration-300 flex items-center justify-center gap-2 ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer'}`}
+              className={`w-full py-4 rounded-xl font-bold transition-all outline-none duration-300 flex items-center justify-center gap-2 ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : (formData.paymentMethod === 'prepaid' ? 'bg-[#0000a0] hover:bg-[#000080] text-white shadow-lg' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer')}`}
             >
               {loading ? (
                 <>
@@ -276,7 +306,16 @@ export default function CheckoutPage() {
                   </svg>
                   Procesando Pedido...
                 </>
-              ) : "Confirmar Pedido"}
+              ) : (
+                formData.paymentMethod === 'prepaid' ? (
+                  <>
+                    <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                    Pagar de forma segura con Wompi
+                  </>
+                ) : (
+                  "Confirmar Pedido (Contra Entrega)"
+                )
+              )}
             </button>
           </form>
         </div>
@@ -286,8 +325,12 @@ export default function CheckoutPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm transition-opacity duration-300">
             <div className="flex flex-col items-center bg-white p-8 rounded-3xl shadow-2xl transform scale-100 animate-pulse">
               <div className="w-20 h-20 border-4 border-orange-100 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-              <h3 className="text-xl font-black text-gray-800 mb-2">Procesando tu compra...</h3>
-              <p className="text-gray-500 font-medium">Estamos preparando todo para ti.</p>
+              <h3 className="text-xl font-black text-gray-800 mb-2">
+                {formData.paymentMethod === 'prepaid' ? 'Redirigiendo a Wompi...' : 'Procesando tu compra...'}
+              </h3>
+              <p className="text-gray-500 font-medium">
+                {formData.paymentMethod === 'prepaid' ? 'Por favor espera mientras te llevamos a la pasarela segura.' : 'Estamos preparando todo para ti.'}
+              </p>
             </div>
           </div>
         )}
