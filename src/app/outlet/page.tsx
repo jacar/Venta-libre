@@ -95,7 +95,6 @@ async function getOutletData() {
     featuredProducts.forEach((p: any) => seenIds.add(p.id));
 
     let allProducts = fetchedAllProducts.filter((p: any) => {
-        if (seenIds.has(p.id)) return false;
         if (calzadoCategories.length === 0) {
             const name = p.name.toLowerCase();
             return name.includes("tenis") || name.includes("calzado") || name.includes("zapato") || name.includes("bota");
@@ -199,7 +198,7 @@ export default async function OutletPage() {
           <section id="productos" className="py-8 lg:py-16 px-4 lg:px-6 max-w-[1400px] mx-auto">
               <h2 className="text-2xl font-bold text-center mb-12 tracking-wide uppercase">CALZADOS REPLICAS AAA</h2>
               
-              <SplitProductGallery products={products} />
+              <ElegantProductGrid products={products} />
 
               <div className="mt-12 flex justify-center">
                   <Link href="/categoria/outlet" className="bg-black text-white px-8 py-3.5 text-sm font-semibold tracking-wide uppercase hover:bg-gray-800 transition-colors rounded-sm">
